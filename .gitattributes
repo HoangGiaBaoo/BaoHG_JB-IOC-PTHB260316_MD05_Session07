@@ -1,0 +1,6 @@
+# gradlew phai giu LF, neu khong runner Linux se bao: /usr/bin/env: 'sh\r': No such file or directory
+gradlew text eol=lf
+*.sh    text eol=lf
+*.bat   text eol=crlf
+*.jar   binary
+*.png   binary

@@ -1,0 +1,10 @@
+# Gradle / IDE
+.gradle/
+build/
+out/
+.idea/
+*.iml
+.vscode/
+
+# Self-hosted runner: token that + thu muc lam viec tam
+self-hosted-runner/.env
