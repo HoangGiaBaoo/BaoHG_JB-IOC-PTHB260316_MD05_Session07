@@ -1,0 +1,51 @@
+name: Restaurant Service CI
+on:
+  push:
+    branches:
+      - main
+    # Monorepo: chi chay khi restaurant-service hoac chinh workflow nay thay doi
+    paths:
+      - 'restaurant-service/**'
+      - '.github/workflows/bai4-restaurant-service-ci.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: restaurant-service
+
+jobs:
+  build:
+    # Job chi duoc giao cho runner co DU tat ca cac nhan nay:
+    #   self-hosted -> nhan mac dinh cua moi self-hosted runner
+    #   quickbite   -> nhan rieng khai bao qua bien LABELS trong self-hosted-runner/docker-compose.yml
+    # => chay tren server cua QuickBite, khong chay tren ubuntu-latest cua GitHub
+    runs-on: [self-hosted, quickbite]
+    steps:
+      - name: Thong tin runner
+        working-directory: .
+        run: |
+          echo "Runner name : $RUNNER_NAME"
+          echo "Runner OS   : $RUNNER_OS / $RUNNER_ARCH"
+          echo "Hostname    : $(hostname)"
+          echo "Workspace   : $GITHUB_WORKSPACE"
+
+      - name: Kiem tra quyen truy cap Docker cua host (docker.sock)
+        working-directory: .
+        run: docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
+
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v6
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew bootJar
+
+      - name: Ket qua build
+        run: ls -la build/libs
