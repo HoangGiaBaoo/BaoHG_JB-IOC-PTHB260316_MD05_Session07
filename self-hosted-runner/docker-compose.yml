@@ -41,7 +41,9 @@ services:
       # Thư mục làm việc tạm, mount ra host với ĐÚNG CÙNG đường dẫn.
       # Khi job chạy `docker run -v $PWD:/app ...`, daemon của HOST mới là bên tìm đường dẫn,
       # nên đường dẫn trong container runner và trên host phải trùng nhau.
-      # Thư mục này cũng giữ lại _tool (JDK) giữa các lần chạy.
+      # Thư mục này giữ lại workspace (code đã checkout, build/) giữa các lần chạy. JDK của setup-java
+      # (/opt/hostedtoolcache) và cache Gradle (/root/.gradle) nằm trong container, nên vẫn được
+      # tái sử dụng chừng nào container còn (không bị `down`).
       # Mặc định là /tmp/runner (server Linux). Docker Desktop (Windows/macOS) thì đặt
       # RUNNER_WORK_ROOT=/var/lib/quickbite-runner trong .env, vì /tmp trong VM của Docker Desktop
       # là tmpfs ~400MB và bị mount noexec -> setup-java báo "ENOSPC: no space left on device".
