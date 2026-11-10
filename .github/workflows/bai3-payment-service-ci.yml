@@ -38,12 +38,19 @@ jobs:
     needs: test            # chi chay khi job test thanh cong
     runs-on: ubuntu-latest # runner MOI, hoan toan doc lap voi runner cua job test
     steps:
-      # THU NGHIEM 2: da checkout lai, nhung van bo qua setup-java
+      # Job Isolation: runner cua job build la mot may ao MOI, workspace rong.
+      # -> Khong thay ma nguon da checkout o job test  => phai checkout lai
+      #    (thu nghiem 1: "No such file or directory", workspace chi co . va ..)
+      # -> Khong co JDK 21 da setup o job test         => phai setup-java lai
+      #    (thu nghiem 2: JDK mac dinh 17 -> "error: release version 21 not supported")
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Xem JDK mac dinh cua runner
-        run: java -version
+      - name: Setup Java JDK 21
+        uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: Build Jar
         run: |
@@ -54,5 +61,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: payment-service-jar
+          # Luu ca thu muc chua file JAR (bootJar -> build/libs/payment-service-0.0.1-SNAPSHOT.jar)
           path: payment-service/build/libs/
           retention-days: 7
