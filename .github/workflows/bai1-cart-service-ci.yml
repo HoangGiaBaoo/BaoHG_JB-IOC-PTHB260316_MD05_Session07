@@ -16,5 +16,9 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
+      # gradlew duoc commit tu Windows nen mode la 100644 (khong co bit thuc thi)
+      # -> tren runner Linux: "./gradlew: Permission denied" (exit code 126)
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew bootJar
