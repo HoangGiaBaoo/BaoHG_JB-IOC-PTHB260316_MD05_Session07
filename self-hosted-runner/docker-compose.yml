@@ -31,7 +31,7 @@ services:
       LABELS: quickbite
 
       # 4) Thư mục làm việc (_work): nơi checkout code, cache tool, build
-      RUNNER_WORKDIR: /tmp/runner/work
+      RUNNER_WORKDIR: ${RUNNER_WORK_ROOT:-/tmp/runner}/work
 
     volumes:
       # Socket của Docker daemon trên host: lệnh `docker build/run/ps` trong job sẽ điều khiển
@@ -42,7 +42,10 @@ services:
       # Khi job chạy `docker run -v $PWD:/app ...`, daemon của HOST mới là bên tìm đường dẫn,
       # nên đường dẫn trong container runner và trên host phải trùng nhau.
       # Thư mục này cũng giữ lại _tool (JDK) giữa các lần chạy.
-      - /tmp/runner:/tmp/runner
+      # Mặc định là /tmp/runner (server Linux). Docker Desktop (Windows/macOS) thì đặt
+      # RUNNER_WORK_ROOT=/var/lib/quickbite-runner trong .env, vì /tmp trong VM của Docker Desktop
+      # là tmpfs ~400MB và bị mount noexec -> setup-java báo "ENOSPC: no space left on device".
+      - ${RUNNER_WORK_ROOT:-/tmp/runner}:${RUNNER_WORK_ROOT:-/tmp/runner}
 
     security_opt:
       # Cần trên host bật SELinux thì container mới được dùng docker.sock
