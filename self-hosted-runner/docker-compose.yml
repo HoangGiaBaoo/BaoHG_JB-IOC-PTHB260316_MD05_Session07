@@ -1,0 +1,49 @@
+# Self-hosted runner của QuickBite, phục vụ CI cho restaurant-service
+# Image: myoung34/github-runner, gồm GitHub Actions runner + Docker CLI
+#
+#   cp .env.example .env      # điền REPO_URL + RUNNER_TOKEN (hoặc ACCESS_TOKEN)
+#   docker compose up -d
+#   docker compose logs -f    # chờ dòng "Listening for Jobs"
+#
+# Sau đó vào Settings > Actions > Runners của repo, runner phải ở trạng thái Idle.
+name: quickbite-ci
+
+services:
+  github-runner:
+    image: myoung34/github-runner:latest
+    container_name: quickbite-runner
+    restart: unless-stopped
+    environment:
+      # 1) Runner thuộc về repo nào
+      RUNNER_SCOPE: repo
+      REPO_URL: ${REPO_URL:?Can khai bao REPO_URL trong file .env}
+
+      # 2) Xác thực với GitHub, chọn MỘT trong hai cách:
+      #    - RUNNER_TOKEN: registration token lấy ở Settings > Actions > Runners >
+      #      New self-hosted runner (hết hạn sau 1 giờ, chỉ dùng để đăng ký).
+      #    - ACCESS_TOKEN: Personal Access Token (classic, scope `repo`). Mỗi lần khởi động,
+      #      container tự xin registration token mới, hợp với server chạy lâu dài.
+      RUNNER_TOKEN: ${RUNNER_TOKEN:-}
+      ACCESS_TOKEN: ${ACCESS_TOKEN:-}
+
+      # 3) Tên + nhãn (label) để pipeline gọi tới bằng `runs-on: [self-hosted, quickbite]`
+      RUNNER_NAME: ${RUNNER_NAME:-quickbite-runner-01}
+      LABELS: quickbite
+
+      # 4) Thư mục làm việc (_work): nơi checkout code, cache tool, build
+      RUNNER_WORKDIR: /tmp/runner/work
+
+    volumes:
+      # Socket của Docker daemon trên host: lệnh `docker build/run/ps` trong job sẽ điều khiển
+      # chính Docker của máy host (Docker-outside-of-Docker), không cần chạy daemon thứ 2.
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      # Thư mục làm việc tạm, mount ra host với ĐÚNG CÙNG đường dẫn.
+      # Khi job chạy `docker run -v $PWD:/app ...`, daemon của HOST mới là bên tìm đường dẫn,
+      # nên đường dẫn trong container runner và trên host phải trùng nhau.
+      # Thư mục này cũng giữ lại _tool (JDK) giữa các lần chạy.
+      - /tmp/runner:/tmp/runner
+
+    security_opt:
+      # Cần trên host bật SELinux thì container mới được dùng docker.sock
+      - label:disable
