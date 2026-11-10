@@ -47,7 +47,7 @@ class PaymentServiceTest {
         Payment payment = paymentService.pay(new PaymentRequest(1001L, new BigDecimal("200000"), PaymentMethod.CARD));
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.SUCCESS);
-        assertThat(payment.getFee()).isEqualByComparingTo("3000");
+        assertThat(payment.getFee()).isEqualByComparingTo("2000"); // CO TINH SAI de kiem chung needs
         verify(paymentRepository).save(any(Payment.class));
     }
 
