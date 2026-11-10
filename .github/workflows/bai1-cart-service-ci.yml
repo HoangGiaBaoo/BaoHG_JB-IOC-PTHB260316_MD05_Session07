@@ -1,5 +1,10 @@
 name: Cart Service CI
-on: [push]
+on:
+  push:
+    # Monorepo: chi chay khi cart-service hoac chinh workflow nay thay doi
+    paths:
+      - 'cart-service/**'
+      - '.github/workflows/bai1-cart-service-ci.yml'
 
 # Repo nay chua ca 4 bai (monorepo), cart-service nam trong thu muc con
 defaults:
