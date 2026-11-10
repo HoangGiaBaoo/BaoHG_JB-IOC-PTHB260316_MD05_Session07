@@ -1,0 +1,44 @@
+name: User Service CI
+on:
+  push:
+    branches:
+      - main
+    # Monorepo: chi chay khi user-service hoac chinh workflow nay thay doi
+    paths:
+      - 'user-service/**'
+      - '.github/workflows/bai2-user-service-ci.yml'
+
+# Cac lenh `run` mac dinh chay trong thu muc user-service
+defaults:
+  run:
+    working-directory: user-service
+
+jobs:
+  build_job:
+    # Runner Linux do GitHub cung cap, mien phi cho public repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        # Ban moi nhat tren Marketplace (v7.0.1, chay node24). v4 van chay
+        # nhung bi canh bao "Node.js 20 is deprecated" (xem log Bai 1)
+        uses: actions/checkout@v7
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Jar
+        run: |
+          chmod +x ./gradlew
+          ./gradlew bootJar
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: user-service-artifact
+          # bootJar sinh ra: build/libs/user-service-0.0.1-SNAPSHOT.jar
+          # `path` tinh tu goc workspace (khong ap dung defaults.run.working-directory)
+          path: user-service/build/libs/*.jar
+          retention-days: 3
