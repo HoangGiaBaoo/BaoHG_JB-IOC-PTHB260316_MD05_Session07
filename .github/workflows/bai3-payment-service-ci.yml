@@ -38,12 +38,12 @@ jobs:
     needs: test            # chi chay khi job test thanh cong
     runs-on: ubuntu-latest # runner MOI, hoan toan doc lap voi runner cua job test
     steps:
-      # THU NGHIEM 1: bo qua checkout + setup-java de kiem chung Job Isolation
-      - name: Xem workspace cua job build
-        working-directory: .
-        run: |
-          echo "Workspace: $GITHUB_WORKSPACE"
-          ls -la "$GITHUB_WORKSPACE"
+      # THU NGHIEM 2: da checkout lai, nhung van bo qua setup-java
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Xem JDK mac dinh cua runner
+        run: java -version
 
       - name: Build Jar
         run: |
